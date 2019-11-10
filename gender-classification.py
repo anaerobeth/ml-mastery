@@ -5,8 +5,18 @@ import random
 import nltk
 from nltk.corpus import names
 
-def gender_features(word):
-    return {'last_letter': word[-1]}
+def gender_features(name):
+    name = name.lower()
+    features = {
+        'first_letter': name[0],
+        'last_letter': name[-1],
+        'length': len(name)
+    }
+    for letter in 'abcdefghijklmnopqrstuvwxyz':
+        features['has_({})'.format(letter)] = letter in name
+
+    return features
+
 
 male_names = [(name, 'male') for name in names.words('male.txt')]
 female_names = [(name, 'female') for name in names.words('female.txt')]
@@ -17,14 +27,28 @@ features = [(gender_features(n), gender) for (n, gender) in labeled_names]
 train_set, test_set = features[500:], features[:500]
 
 # 1. Naive Bayes + last letter
-clf = nltk.NaiveBayesClassifier.train(train_set)
-print('Test Accuracy:', nltk.classify.accuracy(clf, test_set))
-# 0.79
-print(clf.show_most_informative_features(3))
+# Test Set Accuracy: 0.79
 # Most Informative Features
 #            last_letter = 'a'            female : male   =     36.8 : 1.0
 #            last_letter = 'k'              male : female =     31.3 : 1.0
 #            last_letter = 'f'              male : female =     26.6 : 1.0
+#
+# Gender classification of Game of Thrones characters:
+# Males: 8 out of 10 were correctly classified
+# Females: 8 out of 10 were correctly classified
+
+# 2. Naive Bayes + last letter + length and extra features
+clf = nltk.NaiveBayesClassifier.train(train_set)
+print('Train Set Accuracy:', nltk.classify.accuracy(clf, train_set))
+Train Set Accuracy: 0.787
+print('Test Set Accuracy:', nltk.classify.accuracy(clf, test_set))
+Test Set Accuracy: 0.786
+
+print(clf.show_most_informative_features(3))
+# Most Informative Features
+#            last_letter = 'k'              male : female =     44.0 : 1.0
+#            last_letter = 'a'            female : male   =     35.4 : 1.0
+#            last_letter = 'f'              male : female =     16.0 : 1.0
 
 male_characters = ['Eddard', 'Robb',' Jon', 'Bran', 'Jaime', 'Joffrey', 'Tyrion', 'Theon', 'Varys', 'Viserys']
 female_characters = ['Catelyn', 'Sansa', 'Arya', 'Cersei', 'Daenerys', 'Melisandre', 'Margaery', 'Brienne', 'Gilly', 'Missandei']
@@ -42,4 +66,6 @@ for name in female_characters:
 print('Gender classification of Game of Thrones characters:')
 print('Males: {} out of 10 were correctly classified'.format(true_males))
 print('Females: {} out of 10 were correctly classified'.format(true_females))
-
+# Gender classification of Game of Thrones characters:
+# Males: 9 out of 10 were correctly classified
+# Females: 9 out of 10 were correctly classified
