@@ -23,8 +23,12 @@ female_names = [(name, 'female') for name in names.words('female.txt')]
 labeled_names = male_names + female_names
 random.shuffle(labeled_names)
 
-features = [(gender_features(n), gender) for (n, gender) in labeled_names]
-train_set, test_set = features[500:], features[:500]
+train_names, val_names, test_names = labeled_names[500:], labeled_names[500:1500], labeled_names[:500]
+
+train_set = [(gender_features(n), gender) for (n, gender) in train_names]
+val_set = [(gender_features(n), gender) for (n, gender) in val_names]
+test_set = [(gender_features(n), gender) for (n, gender) in test_names]
+
 
 # 1. Naive Bayes + last letter
 # Test Set Accuracy: 0.79
