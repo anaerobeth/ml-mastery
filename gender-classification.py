@@ -18,7 +18,7 @@ train_set, test_set = features[500:], features[:500]
 
 # 1. Naive Bayes + last letter
 clf = nltk.NaiveBayesClassifier.train(train_set)
-print(nltk.classify.accuracy(clf, test_set))
+print('Test Accuracy:', nltk.classify.accuracy(clf, test_set))
 # 0.79
 print(clf.show_most_informative_features(3))
 # Most Informative Features
@@ -26,17 +26,20 @@ print(clf.show_most_informative_features(3))
 #            last_letter = 'k'              male : female =     31.3 : 1.0
 #            last_letter = 'f'              male : female =     26.6 : 1.0
 
-# Starks
-print(clf.classify(gender_features('Eddard'))) # male
-print(clf.classify(gender_features('Sansa'))) # female
-# Targaryens
-print(clf.classify(gender_features('Rhaegar'))) # male
-print(clf.classify(gender_features('Daenerys'))) # male - wrong
-# Lannisters
-print(clf.classify(gender_features('Tyrion'))) # male
-print(clf.classify(gender_features('Cersei'))) # female
+male_characters = ['Eddard', 'Robb',' Jon', 'Bran', 'Jaime', 'Joffrey', 'Tyrion', 'Theon', 'Varys', 'Viserys']
+female_characters = ['Catelyn', 'Sansa', 'Arya', 'Cersei', 'Daenerys', 'Melisandre', 'Margaery', 'Brienne', 'Gilly', 'Missandei']
 
-# Others
-print(clf.classify(gender_features('Melisandre'))) # female
-print(clf.classify(gender_features('Tormund'))) # male
+true_males = 0
+for name in male_characters:
+    if clf.classify(gender_features(name)) == 'male':
+        true_males += 1
+
+true_females = 0
+for name in female_characters:
+    if clf.classify(gender_features(name)) == 'female':
+        true_females += 1
+
+print('Gender classification of Game of Thrones characters:')
+print('Males: {} out of 10 were correctly classified'.format(true_males))
+print('Females: {} out of 10 were correctly classified'.format(true_females))
 
