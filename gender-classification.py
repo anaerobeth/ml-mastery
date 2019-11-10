@@ -18,6 +18,14 @@ def gender_features(name):
     return features
 
 
+def inspect_errors(val_names):
+    errors = []
+    for (name, tag) in val_names:
+        guess = clf.classify(gender_features(name))
+        if guess != tag:
+            errors.append( (tag, guess, name) )
+    return errors
+
 male_names = [(name, 'male') for name in names.words('male.txt')]
 female_names = [(name, 'female') for name in names.words('female.txt')]
 labeled_names = male_names + female_names
