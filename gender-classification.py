@@ -1,6 +1,28 @@
 # Identify gender from first names
 # Adapted from https://www.nltk.org/book/ch06.html
 
+game_of_thrones = {
+    'male': [
+        'Eddard', 'Robb',' Jon', 'Bran', 'Jaime', 'Joffrey',
+        'Tyrion', 'Theon', 'Varys', 'Viserys'
+    ],
+    'female': [
+        'Catelyn', 'Sansa', 'Arya', 'Cersei', 'Daenerys', 'Melisandre',
+        'Margaery', 'Brienne', 'Gilly', 'Missandei'
+    ]
+}
+
+japanese = {
+    'male': [
+        'Haruto', 'Yuto', 'Sota', 'Yuki', 'Hayato', 'Haruki',
+        'Ryusei', 'Koki', 'Sora', 'Sosuke'
+    ],
+    'female': [
+        'Himari', 'Hina', 'Yua', 'Sakura', 'Ichika', 'Akari',
+        'Sara', 'Saeko', 'Aiko', 'Atsuko'
+    ]
+}
+
 import random
 import nltk
 from nltk.corpus import names
@@ -10,7 +32,9 @@ def gender_features(name):
     features = {
         'first_letter': name[0],
         'last_letter': name[-1],
-        'length': len(name)
+        'length': len(name),
+        'first_two_letters': name[:2],
+        'last_two_letters': name[-2:]
     }
     for letter in 'abcdefghijklmnopqrstuvwxyz':
         features['has_({})'.format(letter)] = letter in name
@@ -23,22 +47,20 @@ def report(clf, train_set, val_set):
     print('Validation Set Accuracy:', nltk.classify.accuracy(clf, val_set))
     print(clf.show_most_informative_features(3))
 
-    male_characters = ['Eddard', 'Robb',' Jon', 'Bran', 'Jaime', 'Joffrey', 'Tyrion', 'Theon', 'Varys', 'Viserys']
-    female_characters = ['Catelyn', 'Sansa', 'Arya', 'Cersei', 'Daenerys', 'Melisandre', 'Margaery', 'Brienne', 'Gilly', 'Missandei']
+    for index, names in enumerate([game_of_thrones, japanese], start=1):
+        true_males = 0
+        for name in names['male']:
+            if clf.classify(gender_features(name)) == 'male':
+                true_males += 1
 
-    true_males = 0
-    for name in male_characters:
-        if clf.classify(gender_features(name)) == 'male':
-            true_males += 1
+        true_females = 0
+        for name in names['female']:
+            if clf.classify(gender_features(name)) == 'female':
+                true_females += 1
 
-    true_females = 0
-    for name in female_characters:
-        if clf.classify(gender_features(name)) == 'female':
-            true_females += 1
-
-    print('Gender classification of Game of Thrones characters:')
-    print('Males: {} out of 10 were correctly classified'.format(true_males))
-    print('Females: {} out of 10 were correctly classified'.format(true_females))
+        print('Gender classification of Set {}:'.format(index))
+        print('Males: {} out of 10 were correctly classified'.format(true_males))
+        print('Females: {} out of 10 were correctly classified'.format(true_females))
 
 
 def inspect_errors(val_names):
@@ -75,5 +97,20 @@ test_set = [(gender_features(n), gender) for (n, gender) in test_names]
 # 3. Naive Bayes#2 + prefixes/suffixes
 clf = nltk.NaiveBayesClassifier.train(train_set)
 report(clf, train_set, val_set)
-print(inspect_errors(val_names))
 
+""" Results
+Train Set Accuracy: 0.817
+Validation Set Accuracy: 0.816
+Most Informative Features
+        last_two_letters = 'na'           female : male   =    101.5 : 1.0
+        last_two_letters = 'la'           female : male   =     77.0 : 1.0
+        last_two_letters = 'ia'           female : male   =     39.2 : 1.0
+Gender classification of Set 1:
+Males: 7 out of 10 were correctly classified
+Females: 10 out of 10 were correctly classified
+Gender classification of Set 2:
+Males: 5 out of 10 were correctly classified
+Females: 8 out of 10 were correctly classified
+
+Observations: The classifier did well with names of female characters of Game of Thrones but did poorly with male Japanese names.
+"""
